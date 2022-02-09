@@ -15,3 +15,5 @@ The task wants us to implement:
 Added file: _search.c_
 
 Changed in file: _Makefile_ line 184 (added \_search\\)
+
+Command Line Format: `search <search item> <list of items searching for seperated by spaces>`
