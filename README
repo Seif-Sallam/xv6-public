@@ -26,7 +26,7 @@ Added file: _sort1.c_
 
 Changes in file: _Makefile_ line 185 (added sort recipe)
 
-Command Line Format: sort1 <list of items you want to bubble sort>`
+Command Line Format: `sort1 <list of items you want to bubble sort>`
 
 ## Insertion Sort:
 
@@ -35,3 +35,5 @@ Added file: _isort.c_
 Changes in file: _Makefile_ line 185 (added \_isort\\) 
 
 Command Line Format: `isort <list of items to sort>`
+
+
