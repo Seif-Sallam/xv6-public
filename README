@@ -25,4 +25,4 @@ Added file: _sort1.c_
 
 Changes in file: _Makefile_ line 185 (added sort recipe)
 
-Command Line Format: sort1 <list of items you want to bubble sort>`
+Command Line Format: `sort1 <list of items you want to bubble sort>`
