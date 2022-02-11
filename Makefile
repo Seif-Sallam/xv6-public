@@ -182,9 +182,9 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_search\
-	_sort1\
+    _isort\
+    _sort1\
 	
-
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
 
