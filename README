@@ -9,9 +9,20 @@ The task wants us to implement:
 ## Chosen Algorithms
 
 - Linear Search
+- Bubble Sort
 
 ## Linear Search:
 
 Added file: _search.c_
 
 Changed in file: _Makefile_ line 184 (added \_search\\)
+
+Command Line Format: `search <search item> <list of items searching for seperated by spaces>`
+
+## Bubble Sort:
+
+Added file: _sort1.c_
+
+Changes in file: _Makefile_ line 185 (added sort recipe)
+
+Command Line Format: sort1 <list of items you want to bubble sort>`
