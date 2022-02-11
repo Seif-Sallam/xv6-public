@@ -31,11 +31,11 @@ int main(int argc, char * argv[]) {
     
     for(int i=1; i<argc; i++)
     {
-        printf(1, "sorted: %d\n", elements[i]);
+        printf(1, "%d ", elements[i]);
     }
+    printf(1, "\n");
     
-    
-    return 0;
+    exit();
 }
 
 
