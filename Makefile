@@ -184,6 +184,7 @@ UPROGS=\
 	_search\
     _isort\
     _sort1\
+	_test\
 	
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

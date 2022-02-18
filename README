@@ -1,39 +1,19 @@
-# Task description
+# Files to use
 
-The task wants us to implement:
+- user.h
+- usys.S
+- syscall.h
+- syscall.c
+- sysproc.c
+- proc.c
+- defs.h
 
-- Favourite Searching Algorithm.
-- Favourite Sorting Algorithm.
-- 2nd Favourite Sorting Algorithm.
+## Stuff to implement
 
-## Chosen Algorithms
+System calls:
 
-- Linear Search
-- Bubble Sort
-- Insertion Sort
+- Top
+- Ps
+- psize
 
-## Linear Search:
-
-Added file: _search.c_
-
-Changed in file: _Makefile_ line 184 (added \_search\\)
-
-Command Line Format: `search <search item> <list of items searching for seperated by spaces>`
-
-## Bubble Sort:
-
-Added file: _sort1.c_
-
-Changes in file: _Makefile_ line 185 (added sort recipe)
-
-Command Line Format: `sort1 <list of items you want to bubble sort>`
-
-## Insertion Sort:
-
-Added file: _isort.c_
-
-Changes in file: _Makefile_ line 185 (added \_isort\\) 
-
-Command Line Format: `isort <list of items to sort>`
-
-
+int psize(int pid)
