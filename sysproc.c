@@ -84,11 +84,7 @@ int sys_uptime(void)
   return xticks;
 }
 
-int sys_test(void)
+int sys_top(void)
 {
-  int x;
-  argint(0, &x);
-  char *c;
-  argptr(1, &c, 3);
-  return test(x, c);
+  return top();
 }

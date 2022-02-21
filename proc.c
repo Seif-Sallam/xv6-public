@@ -543,24 +543,72 @@ void procdump(void)
   }
 }
 
-int test(int x, char *s)
+int GetIntLength(int value)
+{
+  int valueLength = 0;
+  int copy = value;
+  while (copy != 0)
+  {
+    valueLength++;
+    copy /= 10;
+  }
+  return valueLength;
+}
+
+void PrintWithPaddingI(const int value, int length, int stringOnRight)
+{
+  if (stringOnRight == 0)
+    cprintf("%d", value);
+  int valueLength = GetIntLength(value);
+  if (valueLength < length)
+    for (int i = 0; i < length - valueLength; i++)
+      cprintf(" ");
+
+  if (stringOnRight == 1)
+    cprintf("%d", value);
+}
+
+void PrintWithPadding(const char *string, int length, int stringOnRight)
+{
+  if (stringOnRight == 0)
+    cprintf("%s", string);
+
+  if (strlen(string) < length)
+    for (int i = 0; i < length - strlen(string); i++)
+      cprintf(" ");
+
+  if (stringOnRight == 1)
+    cprintf("%s", string);
+}
+
+int top()
 {
   static char *states[] = {
-      [UNUSED] "unused",
-      [EMBRYO] "embryo",
-      [SLEEPING] "sleep ",
-      [RUNNABLE] "runble",
-      [RUNNING] "run   ",
-      [ZOMBIE] "zombie"};
+      [UNUSED] "Unused",
+      [EMBRYO] "Embryo",
+      [SLEEPING] "Sleep ",
+      [RUNNABLE] "Runable",
+      [RUNNING] "Running",
+      [ZOMBIE] "Zombie"};
   struct proc *p;
-  cprintf("Name, ID, State\n");
+  PrintWithPadding("Name", 10, 0);
+  PrintWithPadding("ID", 10, 0);
+  PrintWithPadding("Size", 10, 0);
+  PrintWithPadding("State", 10, 0);
+  cprintf("\n");
+  cprintf("-----------------------------------------------------------\n");
+  // cprintf("Name, ID, State\n");
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
     if (p->pid != 0)
     {
-      cprintf("%s     %d      %s\n", p->name, p->pid, states[p->state]);
+      PrintWithPadding(p->name, 10, 0);
+      PrintWithPaddingI(p->pid, 10, 0);
+      PrintWithPaddingI(p->sz, 10, 0);
+      PrintWithPadding(states[p->state], 10, 0);
+      cprintf("\n");
     }
   }
-  // cprintf("%d, %s\n", x, s);
+  cprintf("-----------------------------------------------------------\n");
   return 0;
 }
