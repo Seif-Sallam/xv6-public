@@ -88,6 +88,11 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+//counter initialisation
+  for(int i=0; i<24; i++)
+  {
+    p->count[i]=0;
+  }
 
   release(&ptable.lock);
 
@@ -495,6 +500,10 @@ kill(int pid)
   release(&ptable.lock);
   return -1;
 }
+int getcount(int x)
+{
+    return myproc()->count[x];
+}
 
 //PAGEBREAK: 36
 // Print a process listing to console.  For debugging.
@@ -532,3 +541,4 @@ procdump(void)
     cprintf("\n");
   }
 }
+
