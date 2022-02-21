@@ -590,25 +590,44 @@ int top()
       [RUNNABLE] "Runable",
       [RUNNING] "Running",
       [ZOMBIE] "Zombie"};
-  struct proc *p;
-  PrintWithPadding("Name", 10, 0);
-  PrintWithPadding("ID", 10, 0);
-  PrintWithPadding("Size", 10, 0);
-  PrintWithPadding("State", 10, 0);
-  cprintf("\n");
-  cprintf("-----------------------------------------------------------\n");
-  // cprintf("Name, ID, State\n");
-  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  struct proc *p = myproc();
+  int ticks0;
+  while (1)
   {
-    if (p->pid != 0)
+    PrintWithPadding("Name", 10, 0);
+    PrintWithPadding("ID", 10, 0);
+    PrintWithPadding("Size", 10, 0);
+    PrintWithPadding("State", 10, 0);
+    cprintf("\n");
+    cprintf("-----------------------------------------------------------\n");
+    acquire(&ptable.lock);
+    // cprintf("Name, ID, State\n");
+
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
-      PrintWithPadding(p->name, 10, 0);
-      PrintWithPaddingI(p->pid, 10, 0);
-      PrintWithPaddingI(p->sz, 10, 0);
-      PrintWithPadding(states[p->state], 10, 0);
-      cprintf("\n");
+      if (p->pid != 0)
+      {
+        PrintWithPadding(p->name, 10, 0);
+        PrintWithPaddingI(p->pid, 10, 0);
+        PrintWithPaddingI(p->sz, 10, 0);
+        PrintWithPadding(states[p->state], 10, 0);
+        cprintf("\n");
+      }
     }
+    cprintf("-----------------------------------------------------------\n");
+    release(&ptable.lock);
+    acquire(&tickslock);
+    ticks0 = ticks;
+    while (ticks - ticks0 < 100)
+    {
+      if (myproc()->killed)
+      {
+        release(&tickslock);
+        return -1;
+      }
+      sleep(&ticks, &tickslock);
+    }
+    release(&tickslock);
   }
-  cprintf("-----------------------------------------------------------\n");
   return 0;
 }

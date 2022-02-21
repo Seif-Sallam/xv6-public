@@ -12,8 +12,25 @@
 
 System calls:
 
-- Top
+- Top:
 - Ps
 - psize
 
 int psize(int pid)
+
+## Steps to add a new system call and why?
+
+- Adding the system call number definition in `syscall.h`. This is to give the system call a number to be accessed from inside the array of system calls.
+- Adding the system call function declaration in `syscall.c` as an `extern` function and put it inside the function pointer array.
+- Defining the system call function itself in `sysproc.c`. This is where the system call function is defined. It is also the first function in the chain to be called.
+- Declaring the user side system call is in `user.h`.
+- Adding the system call in the assembly file `usys.S`. This is where the user side system call that is declared in `user.h` is linked to the original system call.
+
+### In case we have a helper function
+
+- Declaring the helper function `defs.h` since we will define it in `proc.c` and will be used inside `sysproc.c`
+- Defining any other helper function in `proc.c`
+
+### Using it inside a user program
+
+- Adding a user program as we did last time, but now we call the function we declared inside `user.h`
