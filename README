@@ -1,39 +1,36 @@
-# Task description
+# Files to use
 
-The task wants us to implement:
+- user.h
+- usys.S
+- syscall.h
+- syscall.c
+- sysproc.c
+- proc.c
+- defs.h
 
-- Favourite Searching Algorithm.
-- Favourite Sorting Algorithm.
-- 2nd Favourite Sorting Algorithm.
+## Stuff to implement
 
-## Chosen Algorithms
+System calls:
 
-- Linear Search
-- Bubble Sort
-- Insertion Sort
+- Top:
+- Ps
+- psize
 
-## Linear Search:
+int psize(int pid)
 
-Added file: _search.c_
+## Steps to add a new system call and why?
 
-Changed in file: _Makefile_ line 184 (added \_search\\)
+- Adding the system call number definition in `syscall.h`. This is to give the system call a number to be accessed from inside the array of system calls.
+- Adding the system call function declaration in `syscall.c` as an `extern` function and put it inside the function pointer array.
+- Defining the system call function itself in `sysproc.c`. This is where the system call function is defined. It is also the first function in the chain to be called.
+- Declaring the user side system call is in `user.h`.
+- Adding the system call in the assembly file `usys.S`. This is where the user side system call that is declared in `user.h` is linked to the original system call.
 
-Command Line Format: `search <search item> <list of items searching for seperated by spaces>`
+### In case we have a helper function
 
-## Bubble Sort:
+- Declaring the helper function `defs.h` since we will define it in `proc.c` and will be used inside `sysproc.c`
+- Defining any other helper function in `proc.c`
 
-Added file: _sort1.c_
+### Using it inside a user program
 
-Changes in file: _Makefile_ line 185 (added sort recipe)
-
-Command Line Format: `sort1 <list of items you want to bubble sort>`
-
-## Insertion Sort:
-
-Added file: _isort.c_
-
-Changes in file: _Makefile_ line 185 (added \_isort\\) 
-
-Command Line Format: `isort <list of items to sort>`
-
-
+- Adding a user program as we did last time, but now we call the function we declared inside `user.h`

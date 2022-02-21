@@ -30,3 +30,6 @@ SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(getcount)
+SYSCALL(top)
+SYSCALL(ps)
+
