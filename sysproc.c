@@ -88,3 +88,8 @@ int sys_top(void)
 {
   return top();
 }
+
+int sys_ps(void)
+{
+  return ps();
+}

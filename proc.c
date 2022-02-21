@@ -631,3 +631,34 @@ int top()
   }
   return 0;
 }
+
+int ps()
+{
+   static char *states[] = {
+      [UNUSED] "Unused",
+      [EMBRYO] "Embryo",
+      [SLEEPING] "Sleep ",
+      [RUNNABLE] "Runable",
+      [RUNNING] "Running",
+      [ZOMBIE] "Zombie"};
+  struct proc *p = myproc();
+  PrintWithPadding("PID", 10, 0);
+    PrintWithPadding("State", 10, 0);
+    PrintWithPadding("Name", 10, 0);
+    cprintf("\n");
+    cprintf("-----------------------------------------------------------\n");
+    acquire(&ptable.lock);
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    {
+      if (p->pid != 0)
+      {
+        PrintWithPaddingI(p->pid, 10, 0);
+        PrintWithPadding(states[p->state], 10, 0);
+        PrintWithPadding(p->name, 10, 0);
+        cprintf("\n");
+      }
+    }
+    cprintf("-----------------------------------------------------------\n");
+    release(&ptable.lock);
+    return 0;
+}
