@@ -67,11 +67,11 @@ myproc(void)
   return p;
 }
 
-//PAGEBREAK: 32
-// Look in the process table for an UNUSED proc.
-// If found, change state to EMBRYO and initialize
-// state required to run in the kernel.
-// Otherwise return 0.
+// PAGEBREAK: 32
+//  Look in the process table for an UNUSED proc.
+//  If found, change state to EMBRYO and initialize
+//  state required to run in the kernel.
+//  Otherwise return 0.
 static struct proc *
 allocproc(void)
 {
@@ -90,10 +90,11 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-//counter initialisation
-  for(int i=0; i<24; i++)
+  p->priority = DEFAULT_PRIORITY;
+  // counter initialisation
+  for (int i = 0; i < 24; i++)
   {
-    p->count[i]=0;
+    p->count[i] = 0;
   }
 
   release(&ptable.lock);
@@ -123,8 +124,8 @@ found:
   return p;
 }
 
-//PAGEBREAK: 32
-// Set up first user process.
+// PAGEBREAK: 32
+//  Set up first user process.
 void userinit(void)
 {
   struct proc *p;
@@ -323,18 +324,18 @@ int wait(void)
     }
 
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
-    sleep(curproc, &ptable.lock); //DOC: wait-sleep
+    sleep(curproc, &ptable.lock); // DOC: wait-sleep
   }
 }
 
-//PAGEBREAK: 42
-// Per-CPU process scheduler.
-// Each CPU calls scheduler() after setting itself up.
-// Scheduler never returns.  It loops, doing:
-//  - choose a process to run
-//  - swtch to start running that process
-//  - eventually that process transfers control
-//      via swtch back to the scheduler.
+// PAGEBREAK: 42
+//  Per-CPU process scheduler.
+//  Each CPU calls scheduler() after setting itself up.
+//  Scheduler never returns.  It loops, doing:
+//   - choose a process to run
+//   - swtch to start running that process
+//   - eventually that process transfers control
+//       via swtch back to the scheduler.
 void scheduler(void)
 {
   struct proc *p;
@@ -399,7 +400,7 @@ void sched(void)
 // Give up the CPU for one scheduling round.
 void yield(void)
 {
-  acquire(&ptable.lock); //DOC: yieldlock
+  acquire(&ptable.lock); // DOC: yieldlock
   myproc()->state = RUNNABLE;
   sched();
   release(&ptable.lock);
@@ -445,8 +446,8 @@ void sleep(void *chan, struct spinlock *lk)
   // (wakeup runs with ptable.lock locked),
   // so it's okay to release lk.
   if (lk != &ptable.lock)
-  {                        //DOC: sleeplock0
-    acquire(&ptable.lock); //DOC: sleeplock1
+  {                        // DOC: sleeplock0
+    acquire(&ptable.lock); // DOC: sleeplock1
     release(lk);
   }
   // Go to sleep.
@@ -460,15 +461,15 @@ void sleep(void *chan, struct spinlock *lk)
 
   // Reacquire original lock.
   if (lk != &ptable.lock)
-  { //DOC: sleeplock2
+  { // DOC: sleeplock2
     release(&ptable.lock);
     acquire(lk);
   }
 }
 
-//PAGEBREAK!
-// Wake up all processes sleeping on chan.
-// The ptable lock must be held.
+// PAGEBREAK!
+//  Wake up all processes sleeping on chan.
+//  The ptable lock must be held.
 static void
 wakeup1(void *chan)
 {
@@ -512,13 +513,13 @@ int kill(int pid)
 }
 int getcount(int x)
 {
-    return myproc()->count[x];
+  return myproc()->count[x];
 }
 
-//PAGEBREAK: 36
-// Print a process listing to console.  For debugging.
-// Runs when user types ^P on console.
-// No lock to avoid wedging a stuck machine further.
+// PAGEBREAK: 36
+//  Print a process listing to console.  For debugging.
+//  Runs when user types ^P on console.
+//  No lock to avoid wedging a stuck machine further.
 void procdump(void)
 {
   static char *states[] = {
@@ -551,7 +552,6 @@ void procdump(void)
     cprintf("\n");
   }
 }
-
 
 int GetIntLength(int value)
 {
@@ -608,8 +608,9 @@ int top()
     PrintWithPadding("ID", 10, 0);
     PrintWithPadding("Size", 10, 0);
     PrintWithPadding("State", 10, 0);
+    PrintWithPadding("Priority", 10, 0);
     cprintf("\n");
-    cprintf("-----------------------------------------------------------\n");
+    cprintf("----------------------------------------------------------------------------\n");
     acquire(&ptable.lock);
     // cprintf("Name, ID, State\n");
 
@@ -621,10 +622,11 @@ int top()
         PrintWithPaddingI(p->pid, 10, 0);
         PrintWithPaddingI(p->sz, 10, 0);
         PrintWithPadding(states[p->state], 10, 0);
+        PrintWithPaddingI(p->priority, 10, 0);
         cprintf("\n");
       }
     }
-    cprintf("-----------------------------------------------------------\n");
+    cprintf("----------------------------------------------------------------------------\n");
     release(&ptable.lock);
     acquire(&tickslock);
     ticks0 = ticks;
@@ -644,7 +646,7 @@ int top()
 
 int ps()
 {
-   static char *states[] = {
+  static char *states[] = {
       [UNUSED] "Unused",
       [EMBRYO] "Embryo",
       [SLEEPING] "Sleep ",
@@ -653,22 +655,73 @@ int ps()
       [ZOMBIE] "Zombie"};
   struct proc *p = myproc();
   PrintWithPadding("PID", 10, 0);
-    PrintWithPadding("State", 10, 0);
-    PrintWithPadding("Name", 10, 0);
-    cprintf("\n");
-    cprintf("-----------------------------------------------------------\n");
-    acquire(&ptable.lock);
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  PrintWithPadding("State", 10, 0);
+  PrintWithPadding("Name", 10, 0);
+  PrintWithPadding("Priority", 10, 0);
+  cprintf("\n");
+  cprintf("----------------------------------------------------------------------------\n");
+  acquire(&ptable.lock);
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->pid != 0)
     {
-      if (p->pid != 0)
-      {
-        PrintWithPaddingI(p->pid, 10, 0);
-        PrintWithPadding(states[p->state], 10, 0);
-        PrintWithPadding(p->name, 10, 0);
-        cprintf("\n");
-      }
+      PrintWithPaddingI(p->pid, 10, 0);
+      PrintWithPadding(states[p->state], 10, 0);
+      PrintWithPadding(p->name, 10, 0);
+      PrintWithPaddingI(p->priority, 10, 0);
+      cprintf("\n");
     }
-    cprintf("-----------------------------------------------------------\n");
-    release(&ptable.lock);
-    return 0;
+  }
+  cprintf("-----------------------------------------------------------------------------\n");
+  release(&ptable.lock);
+  return 0;
+}
+
+int setPriority(int pid, int pr)
+{
+  if (pid < 0)
+    return -10;
+
+  if (pr < MAX_PRIORITY)
+    pr = MAX_PRIORITY;
+  else if (pr > MIN_PRIORITY)
+    pr = MIN_PRIORITY;
+
+  struct proc *p;
+  int oldPr = -1;
+  cprintf("pr inside: %d\n", pr);
+  acquire(&ptable.lock);
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state != UNUSED && p->pid == pid)
+    {
+      oldPr = p->priority;
+      p->priority = pr;
+      break;
+    }
+  }
+  release(&ptable.lock);
+  return oldPr;
+}
+
+int getPriority(int pid)
+{
+  if (pid < 0)
+    return -10;
+
+  struct proc *p;
+  int oldPr = 0;
+  acquire(&ptable.lock);
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->state != UNUSED && p->pid == pid)
+    {
+      cprintf("pr inside1 : %d\n", p->priority);
+      oldPr = p->priority;
+      cprintf("pr inside2 : %d\n", p->priority);
+      break;
+    }
+  }
+  release(&ptable.lock);
+  return oldPr;
 }

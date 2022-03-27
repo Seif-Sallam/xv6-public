@@ -84,12 +84,11 @@ int sys_uptime(void)
   return xticks;
 }
 
-
 int sys_getcount(void)
 {
-    int num;
-    argint(0, &num);
-    return getcount(num);
+  int num;
+  argint(0, &num);
+  return getcount(num);
 }
 
 int sys_top(void)
@@ -102,3 +101,21 @@ int sys_ps(void)
   return ps();
 }
 
+int sys_setPriority(void)
+{
+  int pid, pr;
+
+  argint(0, &pid);
+  argint(1, &pr);
+
+  return setPriority(pid, pr);
+}
+
+int sys_getPriority(void)
+{
+  int pid;
+
+  argint(0, &pid);
+
+  return getPriority(pid);
+}

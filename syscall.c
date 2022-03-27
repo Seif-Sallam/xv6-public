@@ -102,6 +102,8 @@ extern int sys_uptime(void);
 extern int sys_getcount(void);
 extern int sys_top(void);
 extern int sys_ps(void);
+extern int sys_setPriority(void);
+extern int sys_getPriority(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -128,7 +130,8 @@ static int (*syscalls[])(void) = {
     [SYS_top] sys_top,
     [SYS_ps] sys_ps,
     [SYS_getcount] sys_getcount,
-
+    [SYS_setPriority] sys_setPriority,
+    [SYS_getPriority] sys_getPriority,
 };
 
 void syscall(void)
@@ -138,10 +141,13 @@ void syscall(void)
 
   num = curproc->tf->eax;
 
-  if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+  if (num > 0 && num < NELEM(syscalls) && syscalls[num])
+  {
     curproc->tf->eax = syscalls[num]();
     curproc->count[num]++;
-  } else {
+  }
+  else
+  {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);
     curproc->tf->eax = -1;

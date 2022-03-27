@@ -32,4 +32,5 @@ SYSCALL(uptime)
 SYSCALL(getcount)
 SYSCALL(top)
 SYSCALL(ps)
-
+SYSCALL(setPriority)
+SYSCALL(getPriority)

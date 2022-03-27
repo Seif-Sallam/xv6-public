@@ -18,9 +18,11 @@
 #define SYS_write 16
 #define SYS_mknod 17
 #define SYS_unlink 18
-#define SYS_link   19
-#define SYS_mkdir  20
-#define SYS_close  21
+#define SYS_link 19
+#define SYS_mkdir 20
+#define SYS_close 21
 #define SYS_top 22
 #define SYS_ps 23
 #define SYS_getcount 24
+#define SYS_setPriority 25
+#define SYS_getPriority 26
