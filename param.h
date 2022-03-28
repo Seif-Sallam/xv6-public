@@ -13,4 +13,4 @@
 #define FSSIZE 1000               // size of file system in blocks
 #define DEFAULT_PRIORITY 5000
 #define MAX_PRIORITY 0
-#define MIN_PRIORITY 10000
+#define MIN_PRIORITY 12000

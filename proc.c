@@ -15,7 +15,7 @@ struct
 
 static struct proc *initproc;
 
-int shchedulingType = 2;
+int shchedulingType = 0;
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
@@ -363,15 +363,19 @@ void scheduler(void)
 
       highestP = ptable.proc;
       for (p0 = ptable.proc; p0 < &ptable.proc[NPROC]; p0++)
-
       {
         if (p0->state == RUNNABLE || p0->state == SLEEPING)
         {
           p0->sleepTime = ticks - p0->startingTicks - p0->awakeTime; // this can never be negative
         }
-        if ((p0->state == RUNNABLE) && (highestP->priority > p0->priority))
-          highestP = p0;
+
+        if ((p0->state == RUNNABLE))
+        {
+          if (highestP->state == SLEEPING || (highestP->priority >= p0->priority))
+            highestP = p0;
+        }
       }
+
       if (highestP != 0)
         p = highestP;
       if (p->state == RUNNABLE)
@@ -398,40 +402,40 @@ void scheduler(void)
 
       highestP = ptable.proc;
       for (p0 = ptable.proc; p0 < &ptable.proc[NPROC]; p0++)
-
       {
         if (p0->state == RUNNABLE || p0->state == SLEEPING)
         {
           p0->sleepTime = ticks - p0->startingTicks - p0->awakeTime; // this can never be negative
         }
-        if ((p0->state == RUNNABLE) && (highestP->priority > p0->priority))
-          highestP = p0;
+
+        if ((p0->state == RUNNABLE))
+        {
+          if (highestP->state == SLEEPING || (highestP->priority >= p0->priority))
+            highestP = p0;
+        }
       }
-      if (highestP != 0)
-        p = highestP;
-      if (p->state == RUNNABLE)
+      // if (highestP != 0)
+      //   p = highestP;
+      if (highestP->state == RUNNABLE)
       {
         // Switch to chosen process.  It is the process's job
         // to release ptable.lock and then reacquire it
         // before jumping back to us.
-        double change = p->awakeTime * 1.25;
-        double den = p->awakeTime + p->sleepTime;
-        if (den != 0)
+        double decayFactor = 2.56;
+        double change = highestP->awakeTime * decayFactor;
+        double den = highestP->awakeTime + highestP->sleepTime;
+        change = change / den;
+        // cprintf("Change %d\n", (int)(change));
+        highestP->priority += change;
+        if (highestP->priority > MIN_PRIORITY)
         {
-          change = change / den;
+          highestP->priority = MIN_PRIORITY;
         }
-        else
-        {
-          change = 0;
-        }
+        c->proc = highestP;
+        switchuvm(highestP);
+        highestP->state = RUNNING;
 
-        p->priority += change;
-
-        c->proc = p;
-        switchuvm(p);
-        p->state = RUNNING;
-
-        swtch(&(c->scheduler), p->context);
+        swtch(&(c->scheduler), highestP->context);
         switchkvm();
 
         // Process is done running for now.
