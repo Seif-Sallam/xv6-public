@@ -94,6 +94,7 @@ found:
   p->priority = DEFAULT_PRIORITY;
   p->sleepTime = 0;
   p->awakeTime = 0;
+  p->startingTicks = ticks;
   // counter initialisation
   for (int i = 0; i < 24; i++)
   {
@@ -356,8 +357,14 @@ void scheduler(void)
     acquire(&ptable.lock);
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
+      if (p->state == RUNNABLE || p->state == SLEEPING)
+      {
+        p->sleepTime = ticks - p->startingTicks - p->awakeTime; // this can never be negative
+      }
       if (p->state != RUNNABLE)
+      {
         continue;
+      }
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -406,7 +413,7 @@ void sched(void)
 void yield(void)
 {
   acquire(&ptable.lock); // DOC: yieldlock
-  myproc()->awakeTime = ticks - myproc()->sleepTime;
+  myproc()->awakeTime = ticks - myproc()->startingTicks - myproc()->sleepTime;
   myproc()->state = RUNNABLE;
   sched();
   release(&ptable.lock);
@@ -615,8 +622,10 @@ int top()
     PrintWithPadding("Size", 10, 0);
     PrintWithPadding("State", 10, 0);
     PrintWithPadding("Priority", 10, 0);
+    PrintWithPadding("Awake T", 10, 0);
+    PrintWithPadding("Sleep T", 10, 0);
     cprintf("\n");
-    cprintf("------------------------------------------------\n");
+    cprintf("------------------------------------------------------------------\n");
     acquire(&ptable.lock);
     // cprintf("Name, ID, State\n");
 
@@ -629,10 +638,12 @@ int top()
         PrintWithPaddingI(p->sz, 10, 0);
         PrintWithPadding(states[p->state], 10, 0);
         PrintWithPaddingI(p->priority, 10, 0);
+        PrintWithPaddingI(p->awakeTime, 10, 0);
+        PrintWithPaddingI(p->sleepTime, 10, 0);
         cprintf("\n");
       }
     }
-    cprintf("------------------------------------------------\n");
+    cprintf("------------------------------------------------------------------\n");
     release(&ptable.lock);
     acquire(&tickslock);
     ticks0 = ticks;
@@ -664,8 +675,10 @@ int ps()
   PrintWithPadding("State", 10, 0);
   PrintWithPadding("Name", 10, 0);
   PrintWithPadding("Priority", 10, 0);
+  PrintWithPadding("Awake Time", 10, 0);
+  PrintWithPadding("Sleep Time", 10, 0);
   cprintf("\n");
-  cprintf("------------------------------------------------\n");
+  cprintf("------------------------------------------------------------------\n");
   acquire(&ptable.lock);
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
@@ -675,10 +688,12 @@ int ps()
       PrintWithPadding(states[p->state], 10, 0);
       PrintWithPadding(p->name, 10, 0);
       PrintWithPaddingI(p->priority, 10, 0);
+      PrintWithPaddingI(p->awakeTime, 10, 0);
+      PrintWithPaddingI(p->sleepTime, 10, 0);
       cprintf("\n");
     }
   }
-  cprintf("------------------------------------------------\n");
+  cprintf("------------------------------------------------------------------\n");
   release(&ptable.lock);
   return 0;
 }
