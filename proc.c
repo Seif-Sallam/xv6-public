@@ -354,102 +354,27 @@ void scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    if (shchedulingType == 1)
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
+      if (p->state != RUNNABLE)
+        continue;
 
-      int maxPri = MIN_PRIORITY;
-      schedualedProc = ptable.proc;
-      struct proc *p2;
-      for (p2 = ptable.proc; p2 < &ptable.proc[NPROC]; p2++)
-      {
-        if (p2->state != RUNNABLE)
-          continue;
-        if (p2->priority < maxPri)
-        {
-          maxPri = p2->priority;
-          schedualedProc = p2;
-        }
-      }
-      if (schedualedProc->state == RUNNABLE)
-      {
-        c->proc = schedualedProc;
-        switchuvm(schedualedProc);
-        schedualedProc->state = RUNNING;
-        swtch(&(c->scheduler), schedualedProc->context);
-        switchkvm();
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
 
-        c->proc = 0;
-      }
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
     }
-    else if (shchedulingType == 2)
-    {
-      int maxPri = MIN_PRIORITY;
-      schedualedProc = ptable.proc;
-      struct proc *p2;
-      for (p2 = ptable.proc; p2 < &ptable.proc[NPROC]; p2++)
-      {
-        if (p2->state != RUNNABLE)
-        {
-          if (p2->state == SLEEPING || p2->state == RUNNABLE)
-          {
-            p2->sleepTime = ticks - p2->awakeTime; // can never be negative
-          }
-          continue;
-        }
-        if (p2->priority < maxPri)
-        {
-          maxPri = p2->priority;
-          schedualedProc = p2;
-        }
-      }
-      if (schedualedProc->state == RUNNABLE)
-      {
-        c->proc = schedualedProc;
-        switchuvm(schedualedProc);
-        schedualedProc->state = RUNNING;
-
-        int wtime = schedualedProc->sleepTime;
-        double decayFactor = 1; // prone to change
-        double dom = (wtime + schedualedProc->awakeTime);
-        double changeInPr = 0.0;
-
-        if (dom != 0)
-          changeInPr = (schedualedProc->awakeTime * decayFactor) / dom;
-
-        if (schedualedProc->priority + changeInPr > MIN_PRIORITY)
-          schedualedProc->priority = MIN_PRIORITY;
-        else
-          schedualedProc->priority += changeInPr; // naieve Decaying
-        swtch(&(c->scheduler), schedualedProc->context);
-        switchkvm();
-
-        c->proc = 0;
-      }
-    }
-    else
-    {
-      for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-      {
-        if (p->state != RUNNABLE)
-          continue;
-
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
-        c->proc = p;
-        switchuvm(p);
-        p->state = RUNNING;
-
-        swtch(&(c->scheduler), p->context);
-        switchkvm();
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-      }
-    }
-    release(&ptable.lock);
   }
+  release(&ptable.lock);
 }
 
 // Enter scheduler.  Must hold only ptable.lock
