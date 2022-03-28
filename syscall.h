@@ -26,3 +26,5 @@
 #define SYS_getcount 24
 #define SYS_setPriority 25
 #define SYS_getPriority 26
+#define SYS_setName 27
+#define SYS_setSchedType 28

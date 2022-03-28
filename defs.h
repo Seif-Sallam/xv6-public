@@ -125,6 +125,8 @@ int top();
 int ps();
 int setPriority(int pid, int pr);
 int getPriority(int pid);
+int setName(char *name);
+int setSchedType(int type);
 
 // swtch.S
 void swtch(struct context **, struct context *);

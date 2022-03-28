@@ -28,6 +28,8 @@ int top();
 int ps();
 int setPriority(int, int);
 int getPriority(int);
+int setName(char *);
+int setSchedType(int);
 
 // ulib.c
 int stat(const char *, struct stat *);

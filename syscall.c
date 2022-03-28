@@ -104,6 +104,8 @@ extern int sys_top(void);
 extern int sys_ps(void);
 extern int sys_setPriority(void);
 extern int sys_getPriority(void);
+extern int sys_setName(void);
+extern int sys_setSchedType(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -132,6 +134,8 @@ static int (*syscalls[])(void) = {
     [SYS_getcount] sys_getcount,
     [SYS_setPriority] sys_setPriority,
     [SYS_getPriority] sys_getPriority,
+    [SYS_setName] sys_setName,
+    [SYS_setSchedType] sys_setSchedType,
 };
 
 void syscall(void)

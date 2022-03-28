@@ -15,6 +15,7 @@ struct
 
 static struct proc *initproc;
 
+int shchedulingType = 2;
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
@@ -91,6 +92,8 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->priority = DEFAULT_PRIORITY;
+  p->sleepTime = 0;
+  p->awakeTime = 0;
   // counter initialisation
   for (int i = 0; i < 24; i++)
   {
@@ -210,6 +213,7 @@ int fork(void)
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
+  np->priority = curproc->priority;
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -339,6 +343,7 @@ int wait(void)
 void scheduler(void)
 {
   struct proc *p;
+  struct proc *schedualedProc;
   struct cpu *c = mycpu();
   c->proc = 0;
 
@@ -349,24 +354,99 @@ void scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (shchedulingType == 1)
     {
-      if (p->state != RUNNABLE)
-        continue;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+      int maxPri = MIN_PRIORITY;
+      schedualedProc = ptable.proc;
+      struct proc *p2;
+      for (p2 = ptable.proc; p2 < &ptable.proc[NPROC]; p2++)
+      {
+        if (p2->state != RUNNABLE)
+          continue;
+        if (p2->priority < maxPri)
+        {
+          maxPri = p2->priority;
+          schedualedProc = p2;
+        }
+      }
+      if (schedualedProc->state == RUNNABLE)
+      {
+        c->proc = schedualedProc;
+        switchuvm(schedualedProc);
+        schedualedProc->state = RUNNING;
+        swtch(&(c->scheduler), schedualedProc->context);
+        switchkvm();
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+        c->proc = 0;
+      }
+    }
+    else if (shchedulingType == 2)
+    {
+      int maxPri = MIN_PRIORITY;
+      schedualedProc = ptable.proc;
+      struct proc *p2;
+      for (p2 = ptable.proc; p2 < &ptable.proc[NPROC]; p2++)
+      {
+        if (p2->state != RUNNABLE)
+        {
+          if (p2->state == SLEEPING || p2->state == RUNNABLE)
+          {
+            p2->sleepTime = ticks - p2->awakeTime; // can never be negative
+          }
+          continue;
+        }
+        if (p2->priority < maxPri)
+        {
+          maxPri = p2->priority;
+          schedualedProc = p2;
+        }
+      }
+      if (schedualedProc->state == RUNNABLE)
+      {
+        c->proc = schedualedProc;
+        switchuvm(schedualedProc);
+        schedualedProc->state = RUNNING;
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+        int wtime = schedualedProc->sleepTime;
+        double decayFactor = 1; // prone to change
+        double dom = (wtime + schedualedProc->awakeTime);
+        double changeInPr = 0.0;
+
+        if (dom != 0)
+          changeInPr = (schedualedProc->awakeTime * decayFactor) / dom;
+
+        if (schedualedProc->priority + changeInPr > MIN_PRIORITY)
+          schedualedProc->priority = MIN_PRIORITY;
+        else
+          schedualedProc->priority += changeInPr; // naieve Decaying
+        swtch(&(c->scheduler), schedualedProc->context);
+        switchkvm();
+
+        c->proc = 0;
+      }
+    }
+    else
+    {
+      for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+      {
+        if (p->state != RUNNABLE)
+          continue;
+
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
     }
     release(&ptable.lock);
   }
@@ -401,6 +481,7 @@ void sched(void)
 void yield(void)
 {
   acquire(&ptable.lock); // DOC: yieldlock
+  myproc()->awakeTime = ticks - myproc()->sleepTime;
   myproc()->state = RUNNABLE;
   sched();
   release(&ptable.lock);
@@ -721,4 +802,22 @@ int getPriority(int pid)
   }
   release(&ptable.lock);
   return oldPr;
+}
+
+int setName(char *name)
+{
+  struct proc *p = myproc();
+
+  for (int i = 0; i < 16; i++)
+    p->name[i] = ' ';
+
+  for (int i = 0; i < strlen(name); i++)
+    p->name[i] = name[i];
+  return 1;
+}
+
+int setSchedType(int type)
+{
+  shchedulingType = type;
+  return 0;
 }

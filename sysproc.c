@@ -119,3 +119,19 @@ int sys_getPriority(void)
 
   return getPriority(pid);
 }
+
+int sys_setName(void)
+{
+  char *name;
+
+  argptr(0, &name, 16);
+
+  return setName(name);
+}
+int sys_setSchedType(void)
+{
+  int type;
+  argint(0, &type);
+
+  return setSchedType(type);
+}

@@ -188,7 +188,8 @@ UPROGS=\
 	_top\
 	_ps\
 	_test\
-
+	_setpriority\
+	
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
 
