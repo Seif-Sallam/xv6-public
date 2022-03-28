@@ -61,7 +61,7 @@ struct proc
   struct inode *cwd;          // Current directory
   char name[16];              // Process name (debugging)
   // int writecount;
-  int count[25];
+  int count[27];
   int priority;
 };
 

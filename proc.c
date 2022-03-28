@@ -610,7 +610,7 @@ int top()
     PrintWithPadding("State", 10, 0);
     PrintWithPadding("Priority", 10, 0);
     cprintf("\n");
-    cprintf("----------------------------------------------------------------------------\n");
+    cprintf("------------------------------------------------\n");
     acquire(&ptable.lock);
     // cprintf("Name, ID, State\n");
 
@@ -626,7 +626,7 @@ int top()
         cprintf("\n");
       }
     }
-    cprintf("----------------------------------------------------------------------------\n");
+    cprintf("------------------------------------------------\n");
     release(&ptable.lock);
     acquire(&tickslock);
     ticks0 = ticks;
@@ -659,7 +659,7 @@ int ps()
   PrintWithPadding("Name", 10, 0);
   PrintWithPadding("Priority", 10, 0);
   cprintf("\n");
-  cprintf("----------------------------------------------------------------------------\n");
+  cprintf("------------------------------------------------\n");
   acquire(&ptable.lock);
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
@@ -672,7 +672,7 @@ int ps()
       cprintf("\n");
     }
   }
-  cprintf("-----------------------------------------------------------------------------\n");
+  cprintf("------------------------------------------------\n");
   release(&ptable.lock);
   return 0;
 }
@@ -689,7 +689,6 @@ int setPriority(int pid, int pr)
 
   struct proc *p;
   int oldPr = -1;
-  cprintf("pr inside: %d\n", pr);
   acquire(&ptable.lock);
   for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
@@ -716,9 +715,7 @@ int getPriority(int pid)
   {
     if (p->state != UNUSED && p->pid == pid)
     {
-      cprintf("pr inside1 : %d\n", p->priority);
       oldPr = p->priority;
-      cprintf("pr inside2 : %d\n", p->priority);
       break;
     }
   }
