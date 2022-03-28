@@ -355,8 +355,7 @@ void scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    
-    
+
     if (shchedulingType == 1) // highest priority
     {
       struct proc *highestP = 0;
@@ -392,7 +391,55 @@ void scheduler(void)
         c->proc = 0;
       }
     }
-    else //default FCFS
+    else if (shchedulingType == 2)
+    {
+      struct proc *highestP = 0;
+      struct proc *p0 = 0;
+
+      highestP = ptable.proc;
+      for (p0 = ptable.proc; p0 < &ptable.proc[NPROC]; p0++)
+
+      {
+        if (p0->state == RUNNABLE || p0->state == SLEEPING)
+        {
+          p0->sleepTime = ticks - p0->startingTicks - p0->awakeTime; // this can never be negative
+        }
+        if ((p0->state == RUNNABLE) && (highestP->priority > p0->priority))
+          highestP = p0;
+      }
+      if (highestP != 0)
+        p = highestP;
+      if (p->state == RUNNABLE)
+      {
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        double change = p->awakeTime * 1.25;
+        double den = p->awakeTime + p->sleepTime;
+        if (den != 0)
+        {
+          change = change / den;
+        }
+        else
+        {
+          change = 0;
+        }
+
+        p->priority += change;
+
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
+    }
+    else // default FCFS
     {
       for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
       {
