@@ -343,7 +343,7 @@ int wait(void)
 void scheduler(void)
 {
   struct proc *p;
-  struct proc *schedualedProc;
+
   struct cpu *c = mycpu();
   c->proc = 0;
 
@@ -373,8 +373,8 @@ void scheduler(void)
       // It should have changed its p->state before coming back.
       c->proc = 0;
     }
+    release(&ptable.lock);
   }
-  release(&ptable.lock);
 }
 
 // Enter scheduler.  Must hold only ptable.lock
