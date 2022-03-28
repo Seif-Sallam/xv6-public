@@ -749,7 +749,7 @@ int setName(char *name)
   struct proc *p = myproc();
 
   for (int i = 0; i < 16; i++)
-    p->name[i] = ' ';
+    p->name[i] = '\0';
 
   for (int i = 0; i < strlen(name); i++)
     p->name[i] = name[i];
